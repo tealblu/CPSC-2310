@@ -1,0 +1,78 @@
+CPSC 2310 Spring 2021
+Lab 10 Questions
+
+1. As discussed in the lab writeup, the locations for min and max are 
+	-8(%rbq) and -4(%rbq), which are 4 apart. How far apart would these
+	addresses be if min and max were chars instead of ints? Why?
+	What if they were doubles? 
+	(You can test this)
+
+	If they were chars, they would be 1 apart. If they were doubles,
+	they would be 8 apart.
+
+
+2. Alter the values assigned to min and max in the driver.s file
+	| min | max | result
+	=======================
+	| 0   | 10  | 012345678910
+	| 5   | 10  | 5678910
+	| 10  | 0   | 0
+	| -5  | 1   | 01
+
+3. What are these lines doing in driver.s?
+
+	movl  -8(%rbp), %eax # min, tmp89
+   	movl  %eax, -12(%rbp)   # tmp89, i
+
+	These lines are essentially setting i equal to min.
+	min -> tmp89 -> i.
+
+4. What happens when you change the jump conditional to jl instead of jle?
+	What if you change it to jg? Why?
+
+	It prints 0123456789 but not 10, since at this point i = 10, 
+	which is not less than 10. It is equal to 10.
+
+
+5. The last line in .L3 handles the for loop change (i++)
+   The third line in .L2  handles the for loop conditional (i < max)
+(The first two lines in .L2 handle the initialization, but we won't alter that)
+	
+Fill in the resulting loop and print out when we change the x86 commands 
+(*some of these create infinite loops so testing directly may take awhile, 
+try to logic through it first. If there is an infinite loop, write "infinite
+loop" as the printout)
+
+	.L3         | .L2  |        for loop                  |    printout
+===========================================================================
+addl  $1, -12(%rbp) | jle  | for(i = min; i <= max; i++)  | 0 1 3 4....10
+subl  $1, -12(%rbp) | jle  | for(i = min; i <= max; i--)  | infinite loop
+addl  $2, -12(%rbp) | jl   | for(i = min; i < max; i+=2)  | 02468
+mull  $2, -12(%rbp) | jge  | for(i = min; i >= max; i*=2) | nothing
+addl  $1, -8(%rbp)  | jle  | for(i = min; i <= max; min++)| infinite loop
+
+
+6. lsl r4, r3, #2 is the same as r4 = 4 * r3. Explain
+
+Lsl performs a logical left shift by n places. In this case, n = 2.
+A left shift of 2 places is equivalent to multiplying by 4.
+lsl r4, r3, #2 shifts r3 left by 2 places and sets r4 equal to the result.
+Therefore, this is the same as r4 = 4 * r3.
+
+
+   ldr r5, [r0, r4] is the same as r5 = arr[i] in this case. How does this work
+
+   ldr stands for load with immediate offset. This command loads the value
+   at an offset of r4 from r0 into r5, which is equivalent to r5 = arr[i] if
+   r0 is the location of arr[] and i = r4.
+
+
+
+7. In the beginning of a function in ARM, we push lr onto the stack. At the
+   end, we pop that value into pc. Why is this important? What does it 
+   accomplish?	
+
+	This is important because we need to keep track of what instruction
+	to execute after the function is done. That is what lr and pc contain.
+	They are passed through the function so that we don't lose their contents
+	when control is passed to the function.
